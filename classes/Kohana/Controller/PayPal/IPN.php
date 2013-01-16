@@ -51,7 +51,7 @@ class Kohana_Controller_PayPal_IPN extends Controller {
      * This should be your primary paypal email address or, if using sandbox,
      * the email address of your seller test user.
      */
-    const EXPECTED_RECEIVER_EMAIL = 'YOUR_EMAIL_ADDRESS';
+    public $expected_receiver_email = 'YOUR_EMAIL_ADDRESS';
 
     /**
      * Main method
@@ -166,7 +166,7 @@ class Kohana_Controller_PayPal_IPN extends Controller {
      */
     protected function _check_and_save()
     {
-        if ($this->_listener->check_email(self::EXPECTED_RECEIVER_EMAIL))
+        if ($this->_listener->check_email($this->expected_receiver_email))
         {
             if ($this->_listener->is_unique_transaction_id())
             {

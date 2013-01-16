@@ -229,9 +229,9 @@ class Kohana_PayPal_IPN_Listener {
 
         $this->_post_data = ($post_data) ? $post_data : Request::initial()->post();
 
-        foreach ($this->get_post_data() as $key => $value)
-        {
-            $encoded_data .= "&$key=".urlencode($value);
+        foreach ($this->_post_data as $key => $value) {
+            $value = urlencode(stripslashes($value));
+            $encoded_data .= "&$key=$value";
         }
 
         // Post encoded data back to PayPal
@@ -325,7 +325,7 @@ class Kohana_PayPal_IPN_Listener {
      */
     public function is_unique_transaction_id()
     {
-        return ORM::factory('PayPal_Payment')->is_unique($this->_post_data['tax_id']);
+        return ORM::factory('PayPal_Payment')->is_unique($this->_post_data['txn_id']);
     }
 
     /**
@@ -351,8 +351,8 @@ class Kohana_PayPal_IPN_Listener {
      */
     public function check_status($status)
     {
-        $payment_status = ($this->_post_data['payment_status '])
-            ? $this->_post_data['payment_status ']
+        $payment_status = (isset($this->_post_data['payment_status']))
+            ? $this->_post_data['payment_status']
             : NULL;
 
         return (stripos($payment_status, $status) !== FALSE);
