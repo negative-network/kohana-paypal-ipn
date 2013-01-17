@@ -133,7 +133,7 @@ class Kohana_PayPal_IPN_Listener {
         }
         else
         {
-            return ($this->_post_data[$key])
+            return (isset($this->_post_data[$key]))
                 ? $this->_post_data[$key]
                 : $default;
         }
@@ -270,52 +270,32 @@ class Kohana_PayPal_IPN_Listener {
     }
 
     /**
-     * Check if the payment is completed
+     * Check payment status against the give string
      *
-     * The payment has been completed, and the funds have been
-     * added successfully to your account balance
+     * Completed:           The payment has been completed, and the funds have been
+     *                      added successfully to your account balance
      *
+     * Refunded:            You refunded the payment
+     *
+     * Reversed:            A payment was reversed due to a charge-back or other type of reversal.
+     *                      The funds have been removed from your account balance and returned to the buyer.
+     *                      The reason for the reversal is specified in the ReasonCode element.
+     *
+     * Canceled_Reversal:   A reversal has been canceled. For example, you won a dispute with the customer,
+     *                      and the funds for the transaction that was reversed have been returned to you.
+     *
+     * Full list of possible payment statuses: http://goo.gl/4ydfC
+     *
+     * @param $status
      * @return bool
      */
-    public function is_completed()
+    public function payment_is($status)
     {
-        return $this->check_status('Completed');
-    }
+        $payment_status = (isset($this->_post_data['payment_status']))
+            ? $this->_post_data['payment_status']
+            : NULL;
 
-    /**
-     * Check if the payment is refunded
-     *
-     * You refunded the payment
-     *
-     * @return bool
-     */
-    public function is_refunded()
-    {
-        return $this->check_status('Refunded');
-    }
-
-    /**
-     * Check if the payment is reversed
-     *
-     * A payment was reversed due to a charge-back or other type of reversal.
-     * The funds have been removed from your account balance and returned to the buyer.
-     * The reason for the reversal is specified in the ReasonCode element
-     *
-     * @return bool
-     */
-    public function is_reversed()
-    {
-        return $this->check_status('Reversed');
-    }
-
-    /**
-     * Check if the payment is a "canceled reversal"
-     *
-     * @return bool
-     */
-    public function is_canceled_reversal()
-    {
-        return $this->check_status('Canceled_Reversal');
+        return (stripos($payment_status, $status) !== FALSE);
     }
 
     /**
@@ -344,21 +324,6 @@ class Kohana_PayPal_IPN_Listener {
     }
 
     /**
-     * Check payment status against the give string
-     *
-     * @param $status
-     * @return bool
-     */
-    public function check_status($status)
-    {
-        $payment_status = (isset($this->_post_data['payment_status']))
-            ? $this->_post_data['payment_status']
-            : NULL;
-
-        return (stripos($payment_status, $status) !== FALSE);
-    }
-
-    /**
      * Save the current payment to database
      */
     public function save_payment()
@@ -366,7 +331,7 @@ class Kohana_PayPal_IPN_Listener {
         $info = '';
         foreach ($this->get_post_data() as $key => $value)
         {
-            if (in_array($key, array('txn_id', 'parent_txn_id', 'mc_gross', 'mc_currency', 'payer_id', 'payer_email', 'first_name', 'last_name')))
+            if ( ! in_array($key, array('txn_id', 'parent_txn_id', 'mc_gross', 'mc_currency', 'payer_id', 'payer_email', 'first_name', 'last_name')))
             {
                 $info .= str_pad($key, 25)." $value\n";
             }

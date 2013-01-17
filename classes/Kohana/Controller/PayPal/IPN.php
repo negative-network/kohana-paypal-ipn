@@ -95,24 +95,24 @@ class Kohana_Controller_PayPal_IPN extends Controller {
      */
     protected function _process_verified_payment()
     {
-        if ($this->_listener->is_completed())
+        if ($this->_listener->payment_is('Completed'))
         {
-            // The payment is "Completed", process it
+            // The payment status is "Completed", process it
             $this->_process_completed_payment();
         }
-        elseif ($this->_listener->is_refunded())
+        elseif ($this->_listener->payment_is('Refunded'))
         {
-            // The payment is "Refunded", process it
+            // The payment status is "Refunded", process it
             $this->_process_refunded_payment();
         }
-        elseif ($this->_listener->is_reversed())
+        elseif ($this->_listener->payment_is('Reversed'))
         {
-            // The payment is "Reversed", process it
+            // The payment status is "Reversed", process it
             $this->_process_reversed_payment();
         }
-        elseif ($this->_listener->is_canceled_reversal())
+        elseif ($this->_listener->payment_is('Canceled_Reversal'))
         {
-            // The payment is a "Canceled Reversal", process it
+            // The payment status is "Canceled Reversal", process it
             $this->_process_canceled_reversal_payment();
         }
     }
