@@ -94,9 +94,8 @@ You can test your listener 2 ways:
         <input type="hidden" name="amount" value="9.99">
         <input type="hidden" name="return" value="THIS URL">
         <input type="hidden" name="notify_url" value="THE URL TO YOUR ipn.php SCRIPT">
-        <input type="image" src="http://www.paypal.com/en_US/i/btn/btn_buynow_LG.gif"
-            border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
-    </form>
+        <input type="image" src="http://www.paypal.com/en_US/i/btn/btn_buynow_LG.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+    	</form>
 
 As you see you can specify the notify url also in the form, but I don't think it is a good idea, for security reasons.
 
