@@ -60,7 +60,7 @@ Implementing PayPal IPN with this module is more than easy. After you cloned thi
 
 Here is how it should look like:
 
-    class Controller_PayPal extends Kohana_Controller_PayPal_IPN {
+    class Controller_Ipn extends Kohana_Controller_PayPal_IPN {
         public $use_sandbox = TRUE;
         public $expected_receiver_email = 'seller@paypalsandbox.com';
     }
@@ -74,7 +74,7 @@ In your controller you can override the `_process_xxx` methods, to process diffe
 
 That's it :)
 
-Now your IPN listener controller is accesible at: *http://www.yoursite.com/paypal*.
+Now your IPN listener controller is accesible at: *http://www.yoursite.com/ipn*.
 
 Now you register you IPN listener here:
 Login to PayPal -> Profile -> My selling tools -> Instant payment notifications -> Notification Url.

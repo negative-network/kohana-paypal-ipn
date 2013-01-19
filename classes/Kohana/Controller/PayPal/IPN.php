@@ -18,13 +18,6 @@ class Kohana_Controller_PayPal_IPN extends Controller {
     public $log_errors = TRUE;
 
     /**
-     *  Whether to use sandbox or work live
-     *
-     *  @var boolean
-     */
-    public $use_sandbox = FALSE;
-
-    /**
      * Whether to use or not SSL when connecting to paypal
      *
      * @var bool
@@ -60,7 +53,6 @@ class Kohana_Controller_PayPal_IPN extends Controller {
     {
         // Create and set up listener
         $this->_listener = PayPal_IPN_Listener::factory();
-        $this->_listener->use_sandbox = $this->use_sandbox;
         $this->_listener->use_ssl = $this->use_ssl;
         $this->_listener->timeout = $this->timeout;
 
@@ -100,6 +92,11 @@ class Kohana_Controller_PayPal_IPN extends Controller {
             // The payment status is "Completed", process it
             $this->_process_completed_payment();
         }
+        elseif ($this->_listener->payment_is('Pending'))
+        {
+            // The payment status is "Pending", process it
+            $this->_process_pending_payment();
+        }
         elseif ($this->_listener->payment_is('Refunded'))
         {
             // The payment status is "Refunded", process it
@@ -132,6 +129,14 @@ class Kohana_Controller_PayPal_IPN extends Controller {
      * Process completed payment
      */
     protected function _process_completed_payment()
+    {
+        $this->_check_and_save();
+    }
+
+    /**
+     * Process pending payment
+     */
+    protected function _process_pending_payment()
     {
         $this->_check_and_save();
     }

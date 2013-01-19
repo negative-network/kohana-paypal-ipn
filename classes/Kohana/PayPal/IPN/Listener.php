@@ -14,14 +14,6 @@ class Kohana_PayPal_IPN_Listener {
     const SANDBOX_HOST = 'www.sandbox.paypal.com';
 
     /**
-     *  If true, the paypal sandbox URI www.sandbox.paypal.com is used for the
-     *  post back. If false, the live URI www.paypal.com is used. Default false.
-     *
-     *  @var boolean
-     */
-    public $use_sandbox = FALSE;
-
-    /**
      *  If true, an SSL secure connection (port 443) is used for the post back
      *  as recommended by PayPal. If false, a standard HTTP (port 80) connection
      *  is used. Default true.
@@ -111,7 +103,7 @@ class Kohana_PayPal_IPN_Listener {
      */
     private function get_paypal_host()
     {
-        return ($this->use_sandbox)
+        return (intval($this->get_post_data('test_ipn')) == 1)
             ? self::SANDBOX_HOST
             : self::PAYPAL_HOST;
     }
