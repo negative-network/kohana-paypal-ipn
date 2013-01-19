@@ -262,10 +262,14 @@ class Kohana_PayPal_IPN_Listener {
     }
 
     /**
-     * Check payment status against the give string
+     * Return the payment status
      *
      * Completed:           The payment has been completed, and the funds have been
      *                      added successfully to your account balance
+     *
+     * Denied:              You denied the payment. This happens only if the payment was
+     *                      previously pending because of possible reasons described for the
+     *                      pending_reason variable or the Fraud_Management_Filters_X variable.
      *
      * Refunded:            You refunded the payment
      *
@@ -278,26 +282,21 @@ class Kohana_PayPal_IPN_Listener {
      *
      * Full list of possible payment statuses: http://goo.gl/4ydfC
      *
-     * @param $status
-     * @return bool
+     * @return string
      */
-    public function payment_is($status)
+    public function payment_status()
     {
-        $payment_status = (isset($this->_post_data['payment_status']))
-            ? $this->_post_data['payment_status']
-            : NULL;
-
-        return (stripos($payment_status, $status) !== FALSE);
+        return $this->get_post_data('payment_status');
     }
 
     /**
-     * Check if txn_id has not been previously processed
+     * Check if the transaction is unique (based on transaction id and payment status)
      *
      * @return bool
      */
-    public function is_unique_transaction_id()
+    public function is_unique_transaction()
     {
-        return ORM::factory('PayPal_Payment')->is_unique($this->_post_data['txn_id']);
+        return ORM::factory('PayPal_Payment')->is_unique($this->get_post_data('txn_id'), $this->get_post_data('payment_status'));
     }
 
     /**

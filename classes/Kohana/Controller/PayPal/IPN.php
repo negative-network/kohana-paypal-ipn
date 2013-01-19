@@ -87,30 +87,26 @@ class Kohana_Controller_PayPal_IPN extends Controller {
      */
     protected function _process_verified_payment()
     {
-        if ($this->_listener->payment_is('Completed'))
+        switch ($this->_listener->payment_status())
         {
-            // The payment status is "Completed", process it
-            $this->_process_completed_payment();
-        }
-        elseif ($this->_listener->payment_is('Pending'))
-        {
-            // The payment status is "Pending", process it
-            $this->_process_pending_payment();
-        }
-        elseif ($this->_listener->payment_is('Refunded'))
-        {
-            // The payment status is "Refunded", process it
-            $this->_process_refunded_payment();
-        }
-        elseif ($this->_listener->payment_is('Reversed'))
-        {
-            // The payment status is "Reversed", process it
-            $this->_process_reversed_payment();
-        }
-        elseif ($this->_listener->payment_is('Canceled_Reversal'))
-        {
-            // The payment status is "Canceled Reversal", process it
-            $this->_process_canceled_reversal_payment();
+            case 'Completed':
+                $this->_process_completed_payment();
+                break;
+            case 'Pending':
+                $this->_process_pending_payment();
+                break;
+            case 'Denied':
+                $this->_process_denied_payment();
+                break;
+            case 'Refunded':
+                $this->_process_refunded_payment();
+                break;
+            case 'Reversed':
+                $this->_process_reversed_payment();
+                break;
+            case 'Canceled_Reversal':
+                $this->_process_canceled_reversal_payment();
+                break;
         }
     }
 
@@ -142,6 +138,14 @@ class Kohana_Controller_PayPal_IPN extends Controller {
     }
 
     /**
+     * Process denied payment
+     */
+    protected function _process_denied_payment()
+    {
+        $this->_check_and_save();
+    }
+
+    /**
      * Process refunded payment
      */
     protected function _process_refunded_payment()
@@ -166,14 +170,14 @@ class Kohana_Controller_PayPal_IPN extends Controller {
     }
 
     /**
-     * Check if the receiver email is the expected one, and the transaction id
+     * Check if the receiver email is the expected one, and the transaction
      * is unique. If yes, save the payment to database.
      */
     protected function _check_and_save()
     {
         if ($this->_listener->check_email($this->expected_receiver_email))
         {
-            if ($this->_listener->is_unique_transaction_id())
+            if ($this->_listener->is_unique_transaction())
             {
                 // Save payment to db
                 $this->_listener->save_payment();
@@ -181,13 +185,27 @@ class Kohana_Controller_PayPal_IPN extends Controller {
             else
             {
                 // This transaction id was already used
-                // Do something, or just ignore it
+                if ($this->log_errors)
+                {
+                    $message = strtr('Not unique transaction: [:transaction_id] [:payment_status].', array(
+                        ':transaction_id' => $this->_listener->get_post_data('txn_id'),
+                        ':payment_status' => $this->_listener->get_post_data('payment_status')
+                    ));
+                    Log::instance()->add(Log::NOTICE, $message);
+                }
             }
         }
         else
         {
             // The receiver email address is not the expected one
-            // Do something, or just ignore it
+            if ($this->log_errors)
+            {
+                $message = strtr('Email addresses does not match: [:email_posted] [:email_expected].', array(
+                    ':email_posted' => $this->_listener->get_post_data('receiver_email'),
+                    ':email_expected' => $this->expected_receiver_email
+                ));
+                Log::instance()->add(Log::NOTICE, $message);
+            }
         }
     }
 }

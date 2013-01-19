@@ -32,13 +32,15 @@ class Kohana_Model_PayPal_Payment extends ORM {
      * Check if transaction id is already registered
      *
      * @param $transaction_id
+     * @param $payment_status
      * @return bool
      */
-    public function is_unique($transaction_id)
+    public function is_unique($transaction_id, $payment_status)
     {
         return ! (bool) DB::select(array(DB::expr('COUNT("*")'), 'total_count'))
             ->from($this->_table_name)
             ->where('transaction_id', '=', $transaction_id)
+            ->and_where('payment_status', '=', $payment_status)
             ->execute($this->_db)
             ->get('total_count');
     }
